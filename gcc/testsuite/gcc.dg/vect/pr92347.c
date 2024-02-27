@@ -14,5 +14,5 @@ qh (int oh)
 {
 #pragma omp simd
   for (by = 0; by < oh; ++by)
-    by = zp (by);
+    by = zp (by); /* { dg-warning {forbidden modification of iteration variable .by. in OpenMP loop} } */
 }
