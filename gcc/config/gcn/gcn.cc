@@ -138,6 +138,7 @@ gcn_option_override (void)
       : gcn_arch == PROCESSOR_VEGA20 ? ISA_GCN5
       : gcn_arch == PROCESSOR_GFX908 ? ISA_CDNA1
       : gcn_arch == PROCESSOR_GFX90a ? ISA_CDNA2
+      : gcn_arch == PROCESSOR_GFX90c ? ISA_GCN5
       : gcn_arch == PROCESSOR_GFX1030 ? ISA_RDNA2
       : gcn_arch == PROCESSOR_GFX1036 ? ISA_RDNA2
       : gcn_arch == PROCESSOR_GFX1100 ? ISA_RDNA3
@@ -196,6 +197,7 @@ gcn_option_override (void)
 	flag_xnack = HSACO_ATTR_OFF;
 	break;
       case PROCESSOR_GFX90a:
+      case PROCESSOR_GFX90c:
 	flag_xnack = HSACO_ATTR_ANY;
 	break;
       default:
@@ -203,7 +205,16 @@ gcn_option_override (void)
       }
 
   if (flag_sram_ecc == HSACO_ATTR_DEFAULT)
-    flag_sram_ecc = HSACO_ATTR_ANY;
+  {
+    switch (gcn_arch)
+      {
+      case PROCESSOR_GFX90c:
+	flag_sram_ecc = HSACO_ATTR_OFF;
+	break;
+      default:
+	flag_sram_ecc = HSACO_ATTR_ANY;
+      }
+  }
 }
 
 /* }}}  */
@@ -3050,6 +3061,8 @@ gcn_omp_device_kind_arch_isa (enum omp_device_kind_arch_isa trait,
 	return gcn_arch == PROCESSOR_GFX908;
       if (strcmp (name, "gfx90a") == 0)
 	return gcn_arch == PROCESSOR_GFX90a;
+      if (strcmp (name, "gfx90c") == 0)
+	return gcn_arch == PROCESSOR_GFX90c;
       if (strcmp (name, "gfx1030") == 0)
 	return gcn_arch == PROCESSOR_GFX1030;
       if (strcmp (name, "gfx1036") == 0)
@@ -6595,6 +6608,9 @@ output_file_start (void)
       break;
     case PROCESSOR_GFX90a:
       cpu = "gfx90a";
+      break;
+    case PROCESSOR_GFX90c:
+      cpu = "gfx90c";
       break;
     case PROCESSOR_GFX1030:
       cpu = "gfx1030";
